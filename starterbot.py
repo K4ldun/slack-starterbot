@@ -53,7 +53,8 @@ def handle_command(command, channel):
             response = "Pihka serves today lunch!"
         if command == "do amica":
             response = "Amica server crap today"
-
+        if command == "vote pihka":
+            response = vote("pihka")
     # Sends the response back to the channel
     slack_client.api_call(
         "chat.postMessage",
@@ -61,7 +62,11 @@ def handle_command(command, channel):
         text=response or default_response
     )
 
+pihka = 0
+amica = 0
+
 if __name__ == "__main__":
+
     if slack_client.rtm_connect(with_team_state=False):
         print("Starter Bot connected and running!")
         # Read bot's user ID by calling Web API method `auth.test`
@@ -73,3 +78,16 @@ if __name__ == "__main__":
             time.sleep(RTM_READ_DELAY)
     else:
         print("Connection failed. Exception traceback printed above.")
+
+
+def vote(target):
+    global pihka
+    global amica
+    if target == "pihka":
+        pihka = pihka +1
+        response = "Pihka it is! Votes so far: " + str(pihka)
+        return response
+    if target == "amica":
+        amica = amica +1
+        response = "Shame on you... Votes so far: " + str(amica)
+        return response
