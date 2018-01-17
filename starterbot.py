@@ -53,7 +53,7 @@ def handle_command(command, channel):
             response = "Pihka serves today lunch!"
         if command == "do amica":
             response = "Amica server crap today"
-        if command == "vote pihka":
+        if command == "do vote pihka":
             response = vote("pihka")
     # Sends the response back to the channel
     slack_client.api_call(
