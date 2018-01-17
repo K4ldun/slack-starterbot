@@ -37,6 +37,19 @@ def parse_direct_mention(message_text):
     # the first group contains the username, the second group contains the remaining message
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
+def vote(target):
+    global pihka
+    global amica
+    if target == "pihka":
+        pihka = pihka +1
+        response = "Pihka it is! Votes so far: " + str(pihka)
+        return response
+    if target == "amica":
+        amica = amica +1
+        response = "Shame on you... Votes so far: " + str(amica)
+        return response
+    
+
 def handle_command(command, channel):
     """
         Executes bot command if the command is known
@@ -78,16 +91,3 @@ if __name__ == "__main__":
             time.sleep(RTM_READ_DELAY)
     else:
         print("Connection failed. Exception traceback printed above.")
-
-
-def vote(target):
-    global pihka
-    global amica
-    if target == "pihka":
-        pihka = pihka +1
-        response = "Pihka it is! Votes so far: " + str(pihka)
-        return response
-    if target == "amica":
-        amica = amica +1
-        response = "Shame on you... Votes so far: " + str(amica)
-        return response
