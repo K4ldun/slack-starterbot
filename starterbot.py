@@ -48,6 +48,10 @@ def handle_command(command, channel):
     # This is where you start to implement more commands!
     if command.startswith(EXAMPLE_COMMAND):
         response = command + "   Sure...write some more code then I can do that!"
+        if command == "do pihka":
+            response = "Pihka serves today lunch!"
+        if command == "do amica":
+            response = "Amica server crap today"
 
     # Sends the response back to the channel
     slack_client.api_call(
