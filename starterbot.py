@@ -24,8 +24,8 @@ def parse_bot_commands(slack_events):
     for event in slack_events:
         if event["type"] == "message" and not "subtype" in event:
             user_id, message = parse_direct_mention(event["text"])
-            # if user_id == starterbot_id:
-            return message, event["channel"]
+            if user_id == starterbot_id:
+                return message, event["channel"]
     return None, None
 
 def parse_direct_mention(message_text):
@@ -55,21 +55,20 @@ def handle_command(command, channel):
         Executes bot command if the command is known
     """
     # Default response is help text for the user
-    default_response = command + " Not sure what you mean. Try *{}*.".format(EXAMPLE_COMMAND)
+    default_response = "Not sure what you mean. Try *{}*.".format(EXAMPLE_COMMAND)
 
     # Finds and executes the given command, filling in response
     response = None
     # This is where you start to implement more commands!
     if command.startswith(EXAMPLE_COMMAND):
-        new_command = command.split("do",1)[1]
-        # response = command + "   Sure...write some more code then I can do that!"
-        if new_command == "pihka":
-            response = command + "Pihka serves today lunch!"
-        if new_command == "amica":
+        response = command + "   Sure...write some more code then I can do that!"
+        if command == "do pihka":
+            response = "Pihka serves today lunch!"
+        if command == "do amica":
             response = "Amica server crap today"
-        if new_command == "vote pihka":
+        if command == "do vote pihka":
             response = vote("pihka")
-        if new_command == "vote amica":
+        if command == "do vote amica":
             response = vote("amica")
     # Sends the response back to the channel
     slack_client.api_call(
