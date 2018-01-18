@@ -61,15 +61,15 @@ def handle_command(command, channel):
     response = None
     # This is where you start to implement more commands!
     if command.startswith(EXAMPLE_COMMAND):
-        command = command.split("do",1)
+        new_command = command.split("do",1)
         # response = command + "   Sure...write some more code then I can do that!"
-        if command == "pihka":
+        if new_command == "pihka":
             response = command + "Pihka serves today lunch!"
-        if command == "amica":
+        if new_command == "amica":
             response = "Amica server crap today"
-        if command == "vote pihka":
+        if new_command == "vote pihka":
             response = vote("pihka")
-        if command == "vote amica":
+        if new_command == "vote amica":
             response = vote("amica")
     # Sends the response back to the channel
     slack_client.api_call(
