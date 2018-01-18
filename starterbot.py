@@ -55,13 +55,13 @@ def handle_command(command, channel):
         Executes bot command if the command is known
     """
     # Default response is help text for the user
-    default_response = "Not sure what you mean. Try *{}*.".format(EXAMPLE_COMMAND)
+    default_response = command + " Not sure what you mean. Try *{}*.".format(EXAMPLE_COMMAND)
 
     # Finds and executes the given command, filling in response
     response = None
     # This is where you start to implement more commands!
     if command.startswith(EXAMPLE_COMMAND):
-        command = command[3]
+        command = command.split("do",1)
         # response = command + "   Sure...write some more code then I can do that!"
         if command == "pihka":
             response = command + "Pihka serves today lunch!"
