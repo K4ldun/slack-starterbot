@@ -61,10 +61,10 @@ def handle_command(command, channel):
     response = None
     # This is where you start to implement more commands!
     if command.startswith(EXAMPLE_COMMAND):
-        command = command.split("do",1)
+        command = command[3]
         # response = command + "   Sure...write some more code then I can do that!"
         if command == "pihka":
-            response = "Pihka serves today lunch!"
+            response = command + "Pihka serves today lunch!"
         if command == "amica":
             response = "Amica server crap today"
         if command == "vote pihka":
