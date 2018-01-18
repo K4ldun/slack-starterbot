@@ -48,7 +48,7 @@ def vote(target):
         amica = amica +1
         response = "Shame on you... Votes so far: " + str(amica)
         return response
-    
+
 
 def handle_command(command, channel):
     """
@@ -61,13 +61,16 @@ def handle_command(command, channel):
     response = None
     # This is where you start to implement more commands!
     if command.startswith(EXAMPLE_COMMAND):
-        response = command + "   Sure...write some more code then I can do that!"
-        if command == "do pihka":
+        command = command.split("do ",1)
+        # response = command + "   Sure...write some more code then I can do that!"
+        if command == "pihka":
             response = "Pihka serves today lunch!"
-        if command == "do amica":
+        if command == "amica":
             response = "Amica server crap today"
-        if command == "do vote pihka":
+        if command == "vote pihka":
             response = vote("pihka")
+        if command == "vote amica":
+            response = vote("amica")
     # Sends the response back to the channel
     slack_client.api_call(
         "chat.postMessage",
