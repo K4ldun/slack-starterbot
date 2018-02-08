@@ -28,6 +28,7 @@ def parse_bot_commands(slack_events):
                 return message, event["channel"]
     return None, None
 
+
 def parse_direct_mention(message_text):
     """
         Finds a direct mention (a mention that is at the beginning) in message text
@@ -47,6 +48,11 @@ def vote(target):
     if target == "amica":
         amica = amica +1
         response = "Shame on you... Votes so far: " + str(amica)
+        return response
+    if target == "reset":
+        amica = 0
+        pihka = 0
+        response = "Votes reset"
         return response
 
 
@@ -93,3 +99,17 @@ if __name__ == "__main__":
             time.sleep(RTM_READ_DELAY)
     else:
         print("Connection failed. Exception traceback printed above.")
+
+
+def get_amica():
+    url = "www.amica.fi"
+    response = " "
+
+    return response
+
+
+def get_pihka():
+    url = "www.amica.fi"
+    response = " "
+
+    return response
