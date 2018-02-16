@@ -3,6 +3,7 @@ import time
 import re
 import thetoken
 from slackclient import SlackClient
+import pihkaparser
 
 
 # instantiate Slack client
@@ -69,7 +70,8 @@ def handle_command(command, channel):
     if command.startswith(EXAMPLE_COMMAND):
         response = command + "   Sure...write some more code then I can do that!"
         if command == "do pihka":
-            response = "Pihka serves today lunch!"
+            response = pihkaparser.asString()
+            		
         if command == "do amica":
             response = "Amica server crap today"
         if command == "do vote pihka":
