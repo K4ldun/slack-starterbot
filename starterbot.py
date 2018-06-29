@@ -1,20 +1,54 @@
+# -*- coding: utf-8 -*-
 import os
 import time
 import re
+import urllib.request
 import thetoken
+import http.client
+import urllib, uuid, json
+#import imp.reload
+#import sys
+#sys.setdefaultencoding('utf8')
 from slackclient import SlackClient
-import pihkaparser
-
-
+import giphy_client
+from giphy_client.rest import ApiException
 # instantiate Slack client
 slack_client = SlackClient(thetoken.TOKEN)
 # starterbot's user ID in Slack: value is assigned after the bot starts up
 starterbot_id = None
-
 # constants
 RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
-EXAMPLE_COMMAND = "do"
-MENTION_REGEX = "^<@(|[WU].+)>(.*)"
+
+# ms translate
+subscriptionKey = '0883489a3ca34d30bafd7913e2657fb4'
+
+host = 'api.cognitive.microsofttranslator.com'
+path = '/translate?api-version=3.0'
+
+# Translate to German and Italian.
+params = "&to=en";
+
+def translate (content):
+
+    headers = {
+        'Ocp-Apim-Subscription-Key': subscriptionKey,
+        'Content-type': 'application/json',
+        'X-ClientTraceId': str(uuid.uuid4())
+    }
+
+    conn = http.client.HTTPSConnection(host)
+    conn.request ("POST", path + params, content.encode('utf-8'), headers)
+    response = conn.getresponse ()
+    response = response.read ()
+    translated = json.loads(response.decode('utf-8'))
+    return translated[0]["translations"][0]["text"]
+
+#requestBody = [{
+#    'Text' : text,
+#}]
+
+#bot starts here
+
 
 def parse_bot_commands(slack_events):
     """
@@ -24,94 +58,47 @@ def parse_bot_commands(slack_events):
     """
     for event in slack_events:
         if event["type"] == "message" and not "subtype" in event:
-            user_id, message = parse_direct_mention(event["text"])
-            if user_id == starterbot_id:
-                return message, event["channel"]
+            return event["text"],event["channel"]
     return None, None
-
-
-def parse_direct_mention(message_text):
-    """
-        Finds a direct mention (a mention that is at the beginning) in message text
-        and returns the user ID which was mentioned. If there is no direct mention, returns None
-    """
-    matches = re.search(MENTION_REGEX, message_text)
-    # the first group contains the username, the second group contains the remaining message
-    return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
-
-def vote(target):
-    global pihka
-    global amica
-    if target == "pihka":
-        pihka = pihka +1
-        response = "Pihka it is! Votes so far: " + str(pihka)
-        return response
-    if target == "amica":
-        amica = amica +1
-        response = "Shame on you... Votes so far: " + str(amica)
-        return response
-    if target == "reset":
-        amica = 0
-        pihka = 0
-        response = "Votes reset"
-        return response
-
-
 def handle_command(command, channel):
-    """
-        Executes bot command if the command is known
-    """
-    # Default response is help text for the user
-    default_response = "Not sure what you mean. Try *{}*.".format(EXAMPLE_COMMAND)
-
-    # Finds and executes the given command, filling in response
-    response = None
-    # This is where you start to implement more commands!
-    if command.startswith(EXAMPLE_COMMAND):
-        response = command + "   Sure...write some more code then I can do that!"
-        if command == "do pihka":
-            response = pihkaparser.asString()
-            		
-        if command == "do amica":
-            response = "Amica server crap today"
-        if command == "do vote pihka":
-            response = vote("pihka")
-        if command == "do vote amica":
-            response = vote("amica")
-    # Sends the response back to the channel
-    slack_client.api_call(
-        "chat.postMessage",
-        channel=channel,
-        text=response or default_response
-    )
-
-pihka = 0
-amica = 0
-
+    # create an instance of the API class
+    api_instance = giphy_client.DefaultApi()
+    api_key = '5q9oGNR4salupuulue1HkHywCbyIIiSD'
+    try:
+       # Search Endpoint
+       requestBody = [{
+             'Text' : command,
+       }]
+       content = json.dumps(requestBody, ensure_ascii=False).encode('utf-8')
+       result = translate (content.decode('utf-8'))
+       api_response = api_instance.gifs_search_get(api_key, result, limit=1)
+       if api_response and len(api_response.data) > 0:
+             slack_client.api_call("chat.postMessage", channel=channel, text=api_response.data[0].url)
+    except ApiException as e:
+    
+        print("Exception when calling DefaultApi->gifs_search_get: %s\n" % e)    
+    
 if __name__ == "__main__":
-
     if slack_client.rtm_connect(with_team_state=False):
         print("Starter Bot connected and running!")
         # Read bot's user ID by calling Web API method `auth.test`
         starterbot_id = slack_client.api_call("auth.test")["user_id"]
         while True:
             command, channel = parse_bot_commands(slack_client.rtm_read())
+            
+            #if command[:10] === ".translate":
+            #    slack_client.api_call("chat.postMessage", channel=channel, text=translate(command[10:]))
             if command:
+                if command[:10] == ".translate":
+                   slack_client.api_call("chat.postMessage", channel=channel, text=translate(json.dumps([{'Text' : command[10:], }])))
+                if command[:7] == ".mustaa":
+                    html_content = urllib.request.urlopen('http://www.caverna.fi/lounas/').read()
+                    matches = re.findall('Mustaa makkaraa', html_content.decode('latin-1'))
+                    if len(matches) == 0: 
+                        slack_client.api_call("chat.postMessage", channel=channel, text="https://media.giphy.com/media/3o7btT1T9qpQZWhNlK/giphy.gif")
+                    else:
+                        slack_client.api_call("chat.postMessage", channel=channel, text="https://media.giphy.com/media/1zSiX3p2XEZpe/giphy.gif")
                 handle_command(command, channel)
-            time.sleep(RTM_READ_DELAY)
+                time.sleep(RTM_READ_DELAY)
     else:
         print("Connection failed. Exception traceback printed above.")
-
-
-def get_amica():
-    url = "www.amica.fi"
-    response = " "
-
-    return response
-
-
-def get_pihka():
-    url = "www.amica.fi"
-    response = " "
-
-    return response
