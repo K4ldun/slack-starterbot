@@ -6,12 +6,15 @@ import urllib.request
 import thetoken
 import http.client
 import urllib, uuid, json
+from random import randint
 #import imp.reload
 #import sys
 #sys.setdefaultencoding('utf8')
 from slackclient import SlackClient
 import giphy_client
 from giphy_client.rest import ApiException
+import keys
+
 # instantiate Slack client
 slack_client = SlackClient(thetoken.TOKEN)
 # starterbot's user ID in Slack: value is assigned after the bot starts up
@@ -20,7 +23,7 @@ starterbot_id = None
 RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
 
 # ms translate
-subscriptionKey = '0883489a3ca34d30bafd7913e2657fb4'
+#subscriptionKey = '0883489a3ca34d30bafd7913e2657fb4'
 
 host = 'api.cognitive.microsofttranslator.com'
 path = '/translate?api-version=3.0'
@@ -29,7 +32,7 @@ path = '/translate?api-version=3.0'
 params = "&to=en";
 
 def translate (content):
-
+    subscriptionKey = keys.subKey
     headers = {
         'Ocp-Apim-Subscription-Key': subscriptionKey,
         'Content-type': 'application/json',
@@ -61,9 +64,10 @@ def parse_bot_commands(slack_events):
             return event["text"],event["channel"]
     return None, None
 def handle_command(command, channel):
+    api_key = keys.api_key
     # create an instance of the API class
     api_instance = giphy_client.DefaultApi()
-    api_key = '5q9oGNR4salupuulue1HkHywCbyIIiSD'
+#    api_key = '5q9oGNR4salupuulue1HkHywCbyIIiSD'
     try:
        # Search Endpoint
        requestBody = [{
@@ -71,9 +75,10 @@ def handle_command(command, channel):
        }]
        content = json.dumps(requestBody, ensure_ascii=False).encode('utf-8')
        result = translate (content.decode('utf-8'))
-       api_response = api_instance.gifs_search_get(api_key, result, limit=1)
-       if api_response and len(api_response.data) > 0:
-             slack_client.api_call("chat.postMessage", channel=channel, text=api_response.data[0].url)
+       api_response = api_instance.gifs_search_get(api_key, result, limit=20)
+       if api_response and len(api_response.data) > 0:             
+             rand = randint(0,len(api_response.data))
+             slack_client.api_call("chat.postMessage", channel=channel, text=api_response.data[rand].url)
     except ApiException as e:
     
         print("Exception when calling DefaultApi->gifs_search_get: %s\n" % e)    
