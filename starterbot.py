@@ -46,10 +46,6 @@ def translate (content):
     translated = json.loads(response.decode('utf-8'))
     return translated[0]["translations"][0]["text"]
 
-#requestBody = [{
-#    'Text' : text,
-#}]
-
 #bot starts here
 
 
@@ -67,7 +63,6 @@ def handle_command(command, channel):
     api_key = keys.api_key
     # create an instance of the API class
     api_instance = giphy_client.DefaultApi()
-#    api_key = '5q9oGNR4salupuulue1HkHywCbyIIiSD'
     try:
        # Search Endpoint
        requestBody = [{
@@ -75,9 +70,11 @@ def handle_command(command, channel):
        }]
        content = json.dumps(requestBody, ensure_ascii=False).encode('utf-8')
        result = translate (content.decode('utf-8'))
-       api_response = api_instance.gifs_search_get(api_key, result, limit=20)
+       api_response = api_instance.gifs_search_get(api_key, urllib.parse.quote_plus(result), limit=20)
+       print (urllib.parse.quote_plus(result))
+       print (result)
        if api_response and len(api_response.data) > 0:             
-             rand = randint(0,len(api_response.data))
+             rand = randint(0,len(api_response.data)-1)
              slack_client.api_call("chat.postMessage", channel=channel, text=api_response.data[rand].url)
     except ApiException as e:
     
@@ -89,10 +86,13 @@ if __name__ == "__main__":
         # Read bot's user ID by calling Web API method `auth.test`
         starterbot_id = slack_client.api_call("auth.test")["user_id"]
         while True:
-            command, channel = parse_bot_commands(slack_client.rtm_read())
-            
-            #if command[:10] === ".translate":
-            #    slack_client.api_call("chat.postMessage", channel=channel, text=translate(command[10:]))
+            try:
+                command, channel = parse_bot_commands(slack_client.rtm_read())
+            except Exception as e:
+                print(e)
+                if slack_client.rtm_connect(with_team_state=False):
+                    starterbot_id = slack_client.api_call("auth.test")["user_id"]
+                    command, channel = parse_bot_commands(slack_client.rtm_read())            
             if command:
                 if command[:10] == ".translate":
                    slack_client.api_call("chat.postMessage", channel=channel, text=translate(json.dumps([{'Text' : command[10:], }])))
